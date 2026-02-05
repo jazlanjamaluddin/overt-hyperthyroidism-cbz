@@ -211,7 +211,7 @@
       <div class="logo" aria-hidden="true"></div>
       <div>
         <h1>Anti-thyroid Drug Dose Adjustment Aid</h1>
-        <p class="sub">Decision aid to support adjustment of Carbimazole (CBZ) dose in patients with OVERT Hyperthyroidism especially Graves' Disease. Use clinical judgement and local protocols.</p>
+        <p class="sub">Decision aid to support adjustment of Carbimazole (CBZ) dose in patients with <strong>OVERT</strong> Hyperthyroidism especially Graves' Disease. Use clinical judgement and local protocols.</p>
       </div>
     </div>
 
@@ -258,8 +258,8 @@
           <h3>Current treatment</h3>
           <div class="row2">
             <div>
-              <label for="duration">Duration on ATD (weeks)</label>
-              <input id="duration" type="number" step="any" placeholder="e.g., 0, 2, 12, 20" />
+              <label for="duration">Duration on ATD (months)</label>
+              <input id="duration" type="number" step="any" placeholder="e.g., 0, 1, 3, 6, 12, 18" />
             </div>
             <div>
               <label for="dose">Current CBZ dose (mg/day)</label>
@@ -361,12 +361,11 @@
       action: "Consider stopping ATDs temporarily or reducing to CBZ 5–10 mg daily.\nRepeat TFT after 2 weeks." },
 
     // 3–18 weeks
-    { id: "W3_18_LOWDOSE_NORMAL",
-      when: (c) => inRange(c.duration, 3, 18) && c.dose != null && c.dose < 15 && c.ft4Cat === "normal",
+    { id: "W3_18_NORMAL_FT4_TSH",
+      when: (c) => inRange(c.duration, 3, 18) && c.ft4Cat === "normal" && c.tshCat === "normal",
       action: "Taper down ATD until minimal dose.\nRepeat TFT after 2–3 months." },
-
-    { id: "W3_18_LOWDOSE_HIGH",
-      when: (c) => inRange(c.duration, 3, 18) && c.dose != null && c.dose < 15 && c.ft4Cat === "high",
+{ id: "W3_18_LOWDOSE_HIGH",
+      when: (c) => inRange(c.duration, 3, 18) && c.dose != null && c.dose <= 15 && c.ft4Cat === "high",
       action: "Check adherence.\nConsider continuing old dose or increasing dose.\nRepeat TFT after 2–6 weeks." },
 
     { id: "W3_18_HIGHDose_LOW",
@@ -434,17 +433,18 @@
       ft4Ratio
     };
 
-    const badges = [];    if (ctx.ft4 != null) badges.push(`FT4 or FT3 = ${ctx.ft4} (${ctx.ft4Cat})`);
+    const badges = [];
+    if (ctx.ft4Ratio != null) badges.push(`FT4 or FT3 = ${ctx.ft4} (${ctx.ft4Cat})`);
     else if (ctx.ft4 != null) badges.push(`FT4 or FT3 = ${ctx.ft4} (${ctx.ft4Cat})`);
     if (ctx.tsh != null) badges.push(`TSH = ${ctx.tsh} (${ctx.tshCat})`);
-    if (ctx.duration != null) badges.push(`Duration = ${ctx.duration} weeks`);
+    if (ctx.duration != null) badges.push(`Duration = ${ctx.duration} months`);
     if (ctx.dose != null) badges.push(`Dose = ${ctx.dose} mg/day`);
 
     $("badges").innerHTML = badges.map(b => `<span class="pill">${escapeHtml(b)}</span>`).join("");
 
     const issues = [];
     if (ft4LL == null || ft4UL == null) issues.push("Enter FT4 or FT3 LL and UL.");
-    if (durationNorm == null) issues.push("Enter duration on ATD (weeks).");
+    if (durationNorm == null) issues.push("Enter duration on ATD (months).");
     if (ft4 == null) issues.push("Enter FT4 or FT3 result.");
     if (tshLL == null) issues.push("Enter TSH LL (to classify suppressed TSH).");
     if (tsh == null) issues.push("Enter TSH result.");
