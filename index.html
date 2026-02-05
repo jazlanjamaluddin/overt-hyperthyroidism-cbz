@@ -211,7 +211,7 @@
       <div class="logo" aria-hidden="true"></div>
       <div>
         <h1>Anti-thyroid Drug Dose Adjustment Aid</h1>
-        <p class="sub">Decision aid to support adjustment of Carbimazole (CBZ) dose in patients with <strong>OVERT</strong> Hyperthyroidism especially Graves' Disease. Use clinical judgement and local protocols.</p>
+        <p class="sub">Decision aid to support adjustment of Carbimazole (CBZ) dose in patients with <strong>OVERT</strong> Hyperthyroidism especially Graves' Disease. Use clinical judgement and local protocols</p>
       </div>
     </div>
 
@@ -259,7 +259,7 @@
           <div class="row2">
             <div>
               <label for="duration">Duration on ATD (months)</label>
-              <input id="duration" type="number" step="any" placeholder="e.g., 0, 1, 3, 6, 12, 18" />
+              <input id="duration" type="number" step="any" placeholder="e.g., 0, 2, 12, 20" />
             </div>
             <div>
               <label for="dose">Current CBZ dose (mg/day)</label>
@@ -342,6 +342,15 @@
       when: (c) => c.duration === 0 && c.tshCat === "low" && c.ft4Ratio != null && c.ft4Ratio > 2.0,
       action: "Suggest to start CBZ 30–40 mg/day (e.g., 20 mg BD)." },
 
+    { id: "INIT_NORMAL_TSH_NORMAL_FT4_NORMAL",
+      when: (c) => c.duration === 0 && c.tshCat === "normal" && c.ft4Cat === "normal",
+      action: "Normal TFT result. No overt hyperthyroidism. Please do not use this decision aid." },
+
+    { id: "INIT_TSH_HIGH",
+      when: (c) => c.duration === 0 && c.tshCat === "high",
+      action: "Unlikely overt hyperthyroidism. Please do not use this decision aid." },
+
+
     { id: "INIT_OTHER",
       when: (c) => c.duration === 0 && (c.tshCat !== "low" || c.ft4Ratio == null),
       action: "Unlikely overt hyperthyroidism (by this spreadsheet’s start-dose logic).\nSuggest to repeat TFT or look for other causes." },
@@ -356,11 +365,21 @@
       action: "May continue current dose.\nSuggest to gradually reduce if FT4 is reducing in trend.\nRepeat TFT after 2–6 weeks." },
 
     // 2–3 weeks if FT4 low
-    { id: "W2_3_LOW",
-      when: (c) => inRange(c.duration, 2, 3) && c.ft4Cat === "low",
+    { id: "W1_3_LOW",
+      when: (c) => inRange(c.duration, 1, 3) && c.ft4Cat === "low",
       action: "Consider stopping ATDs temporarily or reducing to CBZ 5–10 mg daily.\nRepeat TFT after 2 weeks." },
 
     // 3–18 weeks
+
+    { id: "W3_18_HIGHDose_HIGH",
+      when: (c) => inRange(c.duration, 3, 18) && c.dose != null && c.dose >= 15 && c.ft4Cat === "high",
+      action: "Suggest to increase dose of ATD. Expert opinion is needed. Consider referral for RAI or surgery." },
+
+    { id: "W3_18_LOWDose_LOW",
+      when: (c) => inRange(c.duration, 3, 18) && c.dose != null && c.dose <= 15 && c.ft4Cat === "low",
+      action: "Taper down ATD until minimal dose.\nRepeat TFT after 2–6 weeks." },
+
+
     { id: "W3_18_NORMAL_FT4_TSH",
       when: (c) => inRange(c.duration, 3, 18) && c.ft4Cat === "normal" && c.tshCat === "normal",
       action: "Taper down ATD until minimal dose.\nRepeat TFT after 2–3 months." },
@@ -369,10 +388,34 @@
       action: "Check adherence.\nConsider continuing old dose or increasing dose.\nRepeat TFT after 2–6 weeks." },
 
     { id: "W3_18_HIGHDose_LOW",
-      when: (c) => inRange(c.duration, 3, 18) && c.dose != null && c.dose > 15 && c.ft4Cat === "low",
+      when: (c) => inRange(c.duration, 3, 18) && c.dose != null && c.dose >= 15 && c.ft4Cat === "low",
       action: "Consider reduce to minimal dose.\nRepeat TFT after 2–6 weeks." },
 
     // >18 weeks
+
+    { id: "WGT18_DLE5_NORMAL_TSHLOW",
+      when: (c) => c.duration != null && c.duration > 18 && c.dose != null && c.dose <= 5 && c.ft4Cat === "normal" && c.tshCat === "low",
+      action: "Taper down ATD until minimal dose.
+Repeat TFT after 2–6 weeks." },
+
+    { id: "WGT18_DLE5_NORMAL_TSHHIGH",
+      when: (c) => c.duration != null && c.duration > 18 && c.dose != null && c.dose <= 5 && c.ft4Cat === "normal" && c.tshCat === "high",
+      action: "Continue current dose of ATD. Discuss about RAI or surgery as response may be unlikely." },
+
+    { id: "WGT18_DLE5_HIGH",
+      when: (c) => c.duration != null && c.duration > 18 && c.dose != null && c.dose <= 5 && c.ft4Cat === "high",
+      action: "Continue current dose of ATD. Discuss about RAI or surgery as response may be unlikely." },
+
+    { id: "WGT18_DLE5_LOW",
+      when: (c) => c.duration != null && c.duration > 18 && c.dose != null && c.dose <= 5 && c.ft4Cat === "low",
+      action: "May consider discontinue ATD.
+Repeat TFT every 1–3 months for 12 months." },
+
+    { id: "WGT18_DGT5_LT10_LOW",
+      when: (c) => c.duration != null && c.duration > 18 && c.dose != null && c.dose > 5 && c.dose < 10 && c.ft4Cat === "low",
+      action: "May consider discontinue ATD.
+Repeat TFT every 1–3 months for 12 months." },
+
     { id: "WGT18_DLE5_NORMAL_TSHNORMAL",
       when: (c) => c.duration != null && c.duration > 18 && c.dose != null && c.dose <= 5 && c.ft4Cat === "normal" && c.tshCat === "normal",
       action: "Discontinue ATD.\nRepeat TFT every 1–3 months for 12 months." },
